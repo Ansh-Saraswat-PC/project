@@ -1,0 +1,17 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY agent.py .
+
+EXPOSE 8080
+
+# CRITICAL: Cloud Run read-only filesystem bypass for ADK
+ENV ADK_ARTIFACT_SERVICE_URI="file:///tmp/adk_artifacts"
+ENV ADK_SESSION_SERVICE_URI="memory://"
+
+# Start the ADK API server
+CMD ["adk", "api_server", "--host", "0.0.0.0", "--port", "8080", "--allow_origins", "*"]
